@@ -30,13 +30,13 @@ public class EnvironmentServiceImpl implements EnvironmentService {
 	public EnvironmentResponse createEnvironment(EnvironmentRequest request) {
 		log.info("Creating environment with name={}", request.getName());
 		
-		if(environmentRepository.existByName(request.getName())) {
+		if(environmentRepository.existsByName(request.getName())) {
 			throw new DuplicateEnvironmentException("Environment already exists with name: "+ request.getName());
 		}
 		
 		Environment environment = Environment.builder()
 				.name(request.getName())
-				.stauts(EnvironmentStatus.CREATING)
+				.status(EnvironmentStatus.CREATING)
 				.build();
 		
 		environment = environmentRepository.save(environment);
@@ -51,7 +51,7 @@ public class EnvironmentServiceImpl implements EnvironmentService {
 		environment.setPort(containerInfo.getPort());
 		environment.setUserName(containerInfo.getUsername());
 		environment.setPassword(containerInfo.getPassword());
-		environment.setStauts(EnvironmentStatus.RUNNING);
+		environment.setStatus(EnvironmentStatus.RUNNING);
 		
 		environment = environmentRepository.save(environment);
 		
@@ -65,7 +65,7 @@ public class EnvironmentServiceImpl implements EnvironmentService {
 					environment.getName(),
 					ex);
 			
-			environment.setStauts(EnvironmentStatus.FAILED);
+			environment.setStatus(EnvironmentStatus.FAILED);
 			environmentRepository.save(environment);
 			
 			throw new RuntimeException(
@@ -99,7 +99,7 @@ public class EnvironmentServiceImpl implements EnvironmentService {
     	
     	testContainerManager.stopContainer(id);
     	
-    	environment.setStauts(EnvironmentStatus.STOPPED);
+    	environment.setStatus(EnvironmentStatus.STOPPED);
     	
     	environmentRepository.save(environment);
     	
@@ -130,7 +130,7 @@ public class EnvironmentServiceImpl implements EnvironmentService {
 				.host(environment.getHost())
 				.port(environment.getPort())
 				.userName(environment.getUserName())
-				.status(environment.getStauts())
+				.status(environment.getStatus())
 				.build();
 	}
 	

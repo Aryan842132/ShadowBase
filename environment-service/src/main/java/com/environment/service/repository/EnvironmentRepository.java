@@ -12,6 +12,6 @@ public interface EnvironmentRepository extends JpaRepository<Environment, Long>{
 	
 	Optional<Environment> findbyName(String name);
 	
-	boolean existByName(String name);
+	boolean existsByName(String name);
 
 }

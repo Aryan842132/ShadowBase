@@ -49,7 +49,7 @@ public class Environment {
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private EnvironmentStatus stauts;
+	private EnvironmentStatus status;
 	
 	@Column(name="created_at", nullable = false)
 	private LocalDateTime createdAt;
