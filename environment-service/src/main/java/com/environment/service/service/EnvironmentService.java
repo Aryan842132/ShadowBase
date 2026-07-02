@@ -1,6 +1,5 @@
 package com.environment.service.service;
 
-
 import java.util.List;
 
 import com.environment.service.dto.EnvironmentRequest;
@@ -10,12 +9,12 @@ public interface EnvironmentService {
 	
 	EnvironmentResponse createEnvironment(EnvironmentRequest request);
 	
-	EnvironmentResponse getEnvironment(Long Id);
+	EnvironmentResponse getEnvironment(Long id);
 	
 	List<EnvironmentResponse> getAllEnvironment();
 	
-	void stopEnvironment(Long Id);
+	void stopEnvironment(Long id);
 	
-	void deleteEnvironment(Long Id);
+	void deleteEnvironment(Long id);
 
 }
