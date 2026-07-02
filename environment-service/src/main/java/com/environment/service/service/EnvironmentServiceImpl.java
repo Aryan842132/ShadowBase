@@ -41,6 +41,8 @@ public class EnvironmentServiceImpl implements EnvironmentService {
 		
 		environment = environmentRepository.save(environment);
 		
+		try {
+			
 		ContainerInfo containerInfo = testContainerManager.createContainer(environment.getId());
 		
 		environment.setContainerId(containerInfo.getContainerId());
@@ -56,6 +58,20 @@ public class EnvironmentServiceImpl implements EnvironmentService {
 		log.info("Environment created successfully. id={}", environment.getId());
 		
 		return mapToResponse(environment);
+		}
+		catch (Exception ex) {
+			log.error("Failed to create environment. id={}, name={}",
+					environment.getId(),
+					environment.getName(),
+					ex);
+			
+			environment.setStauts(EnvironmentStatus.FAILED);
+			environmentRepository.save(environment);
+			
+			throw new RuntimeException(
+					"Failed to create environment: " + ex.getMessage(),
+					ex);
+		}
 	}
 	
 	@Override
