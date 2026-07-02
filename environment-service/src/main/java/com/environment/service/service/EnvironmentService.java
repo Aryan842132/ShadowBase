@@ -11,7 +11,7 @@ public interface EnvironmentService {
 	
 	EnvironmentResponse getEnvironment(Long id);
 	
-	List<EnvironmentResponse> getAllEnvironment();
+	List<EnvironmentResponse> getAllEnvironments();
 	
 	void stopEnvironment(Long id);
 	

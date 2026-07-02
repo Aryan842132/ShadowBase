@@ -68,7 +68,7 @@ public class EnvironmentServiceImpl implements EnvironmentService {
 	}
 
 	@Override
-	public List<EnvironmentResponse> getAllEnvironment() {
+	public List<EnvironmentResponse> getAllEnvironments() {
 		return environmentRepository.findAll()
 				.stream()
 				.map(this::mapToResponse)
