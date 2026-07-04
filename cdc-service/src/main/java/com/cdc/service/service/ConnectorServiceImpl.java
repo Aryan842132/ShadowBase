@@ -4,12 +4,16 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.cdc.service.client.EnvironmentServiceClient;
 import com.cdc.service.dto.ConnectorRequest;
 import com.cdc.service.dto.ConnectorResponse;
+import com.cdc.service.dto.EnvironmentResponse;
+import com.cdc.service.exception.ConnectorCreationException;
 import com.cdc.service.exception.ConnectorNotFoundException;
 import com.cdc.service.exception.DuplicateConnectorException;
 import com.cdc.service.model.Connector;
 import com.cdc.service.model.ConnectorStatus;
+import com.cdc.service.model.EnvironmentStatus;
 import com.cdc.service.repository.ConnectorRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -21,29 +25,74 @@ import lombok.extern.slf4j.Slf4j;
 public class ConnectorServiceImpl implements ConnectorService {
 	
 	private final ConnectorRepository connectorRepository;
+	
+	private final EnvironmentServiceClient environmentServiceClient;
 
 	@Override
 	public ConnectorResponse createConnector(ConnectorRequest request) {
-		log.info("Creating connector with name={}, environmentId={}", 
-				request.getConnectorName(),
-				request.getEnvironmentId());
-		
-		if(connectorRepository.existsByConnectorName(request.getConnectorName())) {
-			log.warn("Connector already exist with name={}", request.getConnectorName());
-			
-			throw new DuplicateConnectorException("Connector already exists with name: "+request.getConnectorName());
-		}
-		Connector connector = Connector.builder()
-				.environmentId(request.getEnvironmentId())
-				.connectorName(request.getConnectorName())
-				.connectorType(request.getConnectorType())
-				.status(ConnectorStatus.CREATING)
-				.build();
-		
+
+	    log.info("Creating connector with name={}, environmentId={}",
+	            request.getConnectorName(),
+	            request.getEnvironmentId());
+
+	    if (connectorRepository.existsByConnectorName(request.getConnectorName())) {
+
+	        log.warn("Connector already exists with name={}",
+	                request.getConnectorName());
+
+	        throw new DuplicateConnectorException(
+	                "Connector already exists with name: "
+	                        + request.getConnectorName());
+	    }
+
+	    EnvironmentResponse environment;
+
+	    try {
+
+	        environment = environmentServiceClient
+	                .getEnvironment(request.getEnvironmentId());
+
+	        log.info(
+	                "Environment fetched successfully. id={}, name={}, status={}",
+	                environment.getId(),
+	                environment.getName(),
+	                environment.getStatus());
+
+	    } catch (Exception ex) {
+
+	        log.error("Failed to fetch environment with id={}",
+	                request.getEnvironmentId(), ex);
+
+	        throw new ConnectorCreationException(
+	                "Environment not found with id: "
+	                        + request.getEnvironmentId());
+	    }
+
+	    if (environment.getStatus() != EnvironmentStatus.RUNNING) {
+
+	        log.warn(
+	                "Cannot create connector. Environment id={} is in status={}",
+	                environment.getId(),
+	                environment.getStatus());
+
+	        throw new ConnectorCreationException(
+	                "Connector can only be created for RUNNING environments");
+	    }
+
+	    Connector connector = Connector.builder()
+	            .environmentId(request.getEnvironmentId())
+	            .connectorName(request.getConnectorName())
+	            .connectorType(request.getConnectorType())
+	            .status(ConnectorStatus.CREATING)
+	            .databaseName(environment.getName())
+	            .kafkaTopic("cdc." + environment.getName())
+	            .build();
+
 	    Connector savedConnector = connectorRepository.save(connector);
-	    
-	    log.info("Connector created successfully with id={}", savedConnector.getId());
-				
+
+	    log.info("Connector created successfully with id={}",
+	            savedConnector.getId());
+
 	    return mapToResponse(savedConnector);
 	}
 
