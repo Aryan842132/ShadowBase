@@ -1,6 +1,8 @@
 package com.cdc.service.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -8,6 +10,7 @@ import com.cdc.service.client.EnvironmentServiceClient;
 import com.cdc.service.dto.ConnectorRequest;
 import com.cdc.service.dto.ConnectorResponse;
 import com.cdc.service.dto.EnvironmentResponse;
+import com.cdc.service.dto.KafkaConnectorRequest;
 import com.cdc.service.exception.ConnectorCreationException;
 import com.cdc.service.exception.ConnectorNotFoundException;
 import com.cdc.service.exception.DuplicateConnectorException;
@@ -170,5 +173,18 @@ public class ConnectorServiceImpl implements ConnectorService {
 				.updatedAt(connector.getUpdatedAt())
 				.build();
 	}
-
+	/*
+	private KafkaConnectorRequest buildDebeziumConfig(
+			ConnectorRequest request,
+			EnvironmentResponse environment) {
+		
+		Map<String, String> config = new HashMap<>();
+		
+		config.put("connector.class", "io.debezium.connector.mysql.MySQLConnector");
+		config.put("database.hostname", environment.getHost());
+		config.put("database.port", String.valueOf(environment.getPort()));
+		config.put("database.user", environment.getUserName());
+		
+	}
+*/
 }
