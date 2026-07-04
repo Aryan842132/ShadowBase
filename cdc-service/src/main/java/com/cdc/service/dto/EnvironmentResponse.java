@@ -21,5 +21,7 @@ public class EnvironmentResponse {
 	
 	private String userName;
 	
+	private String password;
+	
 	private EnvironmentStatus status;
 }

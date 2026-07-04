@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.cdc.service.client.EnvironmentServiceClient;
+import com.cdc.service.client.KafkaConnectClient;
 import com.cdc.service.dto.ConnectorRequest;
 import com.cdc.service.dto.ConnectorResponse;
 import com.cdc.service.dto.EnvironmentResponse;
@@ -30,6 +31,8 @@ public class ConnectorServiceImpl implements ConnectorService {
 	private final ConnectorRepository connectorRepository;
 	
 	private final EnvironmentServiceClient environmentServiceClient;
+	
+	private final KafkaConnectClient kafkaConnectClient;
 
 	@Override
 	public ConnectorResponse createConnector(ConnectorRequest request) {
@@ -70,17 +73,19 @@ public class ConnectorServiceImpl implements ConnectorService {
 	                "Environment not found with id: "
 	                        + request.getEnvironmentId());
 	    }
-
-	    if (environment.getStatus() != EnvironmentStatus.RUNNING) {
-
-	        log.warn(
-	                "Cannot create connector. Environment id={} is in status={}",
-	                environment.getId(),
-	                environment.getStatus());
-
-	        throw new ConnectorCreationException(
-	                "Connector can only be created for RUNNING environments");
+	    
+	    KafkaConnectorRequest kafkaRequest = buildDebeziumConfig(request, environment);
+	    
+	    try {
+	    	kafkaConnectClient.createConnector(kafkaRequest);
+	    	
+	    	log.info("Debezium connector created  successfully. name={}",request.getConnectorName());
 	    }
+	    catch (Exception ex) {
+			log.error("Failed to create Debezium connector. name={}",
+					request.getConnectorName(), ex);
+			throw new ConnectorCreationException("Failed to create Debezium connector");
+		}
 
 	    Connector connector = Connector.builder()
 	            .environmentId(request.getEnvironmentId())
@@ -173,7 +178,7 @@ public class ConnectorServiceImpl implements ConnectorService {
 				.updatedAt(connector.getUpdatedAt())
 				.build();
 	}
-	/*
+	
 	private KafkaConnectorRequest buildDebeziumConfig(
 			ConnectorRequest request,
 			EnvironmentResponse environment) {
@@ -184,7 +189,17 @@ public class ConnectorServiceImpl implements ConnectorService {
 		config.put("database.hostname", environment.getHost());
 		config.put("database.port", String.valueOf(environment.getPort()));
 		config.put("database.user", environment.getUserName());
+		config.put("database.password", environment.getPassword());
+		config.put("database.server.id", String.valueOf(System.currentTimeMillis()));
+		config.put("topic.prefix", environment.getName());
+		config.put("database.include.list", "testdb");
+		config.put("schema.history.internal.kafka.bootstrap.servers", "kafka:9092");
+		config.put("schema.history.internal.kafka.topic", "schema-changes."+environment.getName());
 		
+		return KafkaConnectorRequest.builder()
+				.name(request.getConnectorName())
+				.config(config)
+				.build();
 	}
-*/
+
 }
