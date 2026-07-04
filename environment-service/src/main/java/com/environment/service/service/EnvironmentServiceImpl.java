@@ -130,6 +130,7 @@ public class EnvironmentServiceImpl implements EnvironmentService {
 				.host(environment.getHost())
 				.port(environment.getPort())
 				.userName(environment.getUserName())
+				.password(environment.getPassword())
 				.status(environment.getStatus())
 				.build();
 	}
