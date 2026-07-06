@@ -185,15 +185,15 @@ public class ConnectorServiceImpl implements ConnectorService {
 		
 		Map<String, String> config = new HashMap<>();
 		
-		config.put("connector.class", "io.debezium.connector.mysql.MySQLConnector");
-		config.put("database.hostname", environment.getHost());
+		config.put("connector.class", "io.debezium.connector.mysql.MySqlConnector");
+		config.put("database.hostname", "host.docker.internal");
 		config.put("database.port", String.valueOf(environment.getPort()));
 		config.put("database.user", environment.getUserName());
 		config.put("database.password", environment.getPassword());
 		config.put("database.server.id", String.valueOf(System.currentTimeMillis()));
 		config.put("topic.prefix", environment.getName());
 		config.put("database.include.list", "testdb");
-		config.put("schema.history.internal.kafka.bootstrap.servers", "kafka:9092");
+		config.put("schema.history.internal.kafka.bootstrap.servers", "kafka:29092");
 		config.put("schema.history.internal.kafka.topic", "schema-changes."+environment.getName());
 		
 		return KafkaConnectorRequest.builder()

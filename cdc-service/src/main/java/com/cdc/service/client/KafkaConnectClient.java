@@ -17,7 +17,7 @@ public class KafkaConnectClient {
 	
 	private final RestClient restClient;
 	
-	@Value("${kafka.connect.url")
+	@Value("${kafka.connect.url}")
 	private String kafkaConnectUrl;
 
 	
