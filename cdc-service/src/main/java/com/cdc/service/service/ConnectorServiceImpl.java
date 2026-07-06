@@ -186,7 +186,7 @@ public class ConnectorServiceImpl implements ConnectorService {
 		Map<String, String> config = new HashMap<>();
 		
 		config.put("connector.class", "io.debezium.connector.mysql.MySqlConnector");
-		config.put("database.hostname", "host.docker.internal");
+		config.put("database.hostname", environment.getHost());
 		config.put("database.port", String.valueOf(environment.getPort()));
 		config.put("database.user", environment.getUserName());
 		config.put("database.password", environment.getPassword());
