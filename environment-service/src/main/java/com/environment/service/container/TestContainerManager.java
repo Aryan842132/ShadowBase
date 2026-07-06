@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.containers.Network;
+
 
 import lombok.extern.slf4j.Slf4j;
 
