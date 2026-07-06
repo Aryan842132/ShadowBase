@@ -16,9 +16,6 @@ public class TestContainerManager {
 
 	private final Map<Long, MySQLContainer<?>> activeContainers = new ConcurrentHashMap<>();
 	
-	private static final Network SHARED_NETWORK = Network.builder()
-			.createNetworkCmdModifier(cmd -> cmd.withName("netflix_netflix-network"))
-			.build();
 	
 	public ContainerInfo createContainer(Long environmentId) {
 		log.info("Stsrting MySQL container for environmentId={}", environmentId);
@@ -29,7 +26,7 @@ public class TestContainerManager {
 				                                  .withDatabaseName("testdb")
 				                                  .withUsername("admin")
 				                                  .withPassword("admin123")
-				                                  .withNetwork(SHARED_NETWORK)
+				                                  .withNetworkMode("netflix_netflix-network")
 				                                  .withNetworkAliases(networkAlias);
 		mysqlContainer.start();
 		
