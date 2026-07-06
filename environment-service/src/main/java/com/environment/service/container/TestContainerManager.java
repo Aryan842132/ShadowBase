@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.containers.Network;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,13 +16,21 @@ public class TestContainerManager {
 
 	private final Map<Long, MySQLContainer<?>> activeContainers = new ConcurrentHashMap<>();
 	
+	private static final Network SHARED_NETWORK = Network.builder()
+			.createNetworkCmdModifier(cmd -> cmd.withName("netflix_netflix-network"))
+			.build();
+	
 	public ContainerInfo createContainer(Long environmentId) {
 		log.info("Stsrting MySQL container for environmentId={}", environmentId);
 		
+		String networkAlias = "mysql-env-" + environmentId;
+				
 		MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
 				                                  .withDatabaseName("testdb")
 				                                  .withUsername("admin")
-				                                  .withPassword("admin123");
+				                                  .withPassword("admin123")
+				                                  .withNetwork(SHARED_NETWORK)
+				                                  .withNetworkAliases(networkAlias);
 		mysqlContainer.start();
 		
 		activeContainers.put(environmentId, mysqlContainer);
@@ -30,8 +39,8 @@ public class TestContainerManager {
 		return ContainerInfo.builder()
 				.containerId(mysqlContainer.getContainerId())
 				.jdbcUrl(mysqlContainer.getJdbcUrl())
-				.host(mysqlContainer.getHost())
-				.port(mysqlContainer.getMappedPort(3306))
+				.host(networkAlias)
+				.port(3306)
 				.username(mysqlContainer.getUsername())
 				.password(mysqlContainer.getPassword())
 				.build();
