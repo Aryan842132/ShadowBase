@@ -18,7 +18,7 @@ public class TestContainerManager {
 	public ContainerInfo createContainer(Long environmentId) {
 		log.info("Starting MySQL container for environmentId={}", environmentId);
 		
-		String networkAlias = "mysql-env-" + environmentId;
+		String containerName = "mysql-env-" + environmentId;
 		
 				
 		MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
@@ -26,7 +26,7 @@ public class TestContainerManager {
 				                                  .withUsername("admin")
 				                                  .withPassword("admin123")
 				                                  .withNetworkMode("netflix-network")
-			                                      .withNetworkAliases(networkAlias)
+			                                      .withCreateContainerCmdModifier(cmd -> cmd.withName(containerName))
 			                                      .withCommand(
 			                                    		  "--log-bin=mysql-bin",
 			                                    		  "--binlog-format=ROW",
@@ -42,7 +42,7 @@ public class TestContainerManager {
 		return ContainerInfo.builder()
 				.containerId(mysqlContainer.getContainerId())
 				.jdbcUrl(mysqlContainer.getJdbcUrl())
-				.host(networkAlias)
+				.host(containerName)
 				.port(3306)
 				.username(mysqlContainer.getUsername())
 				.password(mysqlContainer.getPassword())
