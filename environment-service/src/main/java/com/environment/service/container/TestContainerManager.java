@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.containers.Network;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 public class TestContainerManager {
 
 	private final Map<Long, MySQLContainer<?>> activeContainers = new ConcurrentHashMap<>();
-	
-	
 	
 	public ContainerInfo createContainer(Long environmentId) {
 		log.info("Starting MySQL container for environmentId={}", environmentId);
