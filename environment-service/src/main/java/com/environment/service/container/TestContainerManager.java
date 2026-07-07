@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
+import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.MySQLContainer;
 
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,20 @@ public class TestContainerManager {
 			                                    		  "--enforce-gtid-consistency=ON");
 		                                         
 		mysqlContainer.start();
+		
+		try {
+			ExecResult result = mysqlContainer.execInContainer(
+					"mysql", "-uroot", "-p" + mysqlContainer.getPassword(),
+					"-e",
+					"GRANT REPLICATION SLAVE, REPLICATION CLIENT, RELOAD ON *.* TO 'admin'@'%'; FLUSH PRIVILEGES;"
+			);
+			if(result.getExitCode() != 0){
+				log.error("Grant command failed for environmentId={}: {}", environmentId, result.getStderr());
+			}
+		}
+		catch (Exception e) {
+			log.error("Failed to grant replication privileges for environmentId={}", environmentId,e);
+		}
 		
 		activeContainers.put(environmentId, mysqlContainer);
 		log.info("Container started successfully. containerId={}", mysqlContainer.getContainerId());
