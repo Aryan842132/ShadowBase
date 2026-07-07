@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 import org.testcontainers.containers.MySQLContainer;
-
+import org.testcontainers.containers.Network;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,17 +17,26 @@ public class TestContainerManager {
 	private final Map<Long, MySQLContainer<?>> activeContainers = new ConcurrentHashMap<>();
 	
 	
+	
 	public ContainerInfo createContainer(Long environmentId) {
-		log.info("Stsrting MySQL container for environmentId={}", environmentId);
+		log.info("Starting MySQL container for environmentId={}", environmentId);
 		
 		String networkAlias = "mysql-env-" + environmentId;
+		
 				
 		MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
 				                                  .withDatabaseName("testdb")
 				                                  .withUsername("admin")
 				                                  .withPassword("admin123")
-				                                  .withNetworkMode("netflix_netflix-network")
-				                                  .withNetworkAliases(networkAlias);
+				                                  .withNetworkMode("netflix-network")
+			                                      .withNetworkAliases(networkAlias)
+			                                      .withCommand(
+			                                    		  "--log-bin=mysql-bin",
+			                                    		  "--binlog-format=ROW",
+			                                    		  "--server-id=" + environmentId,
+			                                    		  "--gtid-mode=ON",
+			                                    		  "--enforce-gtid-consistency=ON");
+		                                         
 		mysqlContainer.start();
 		
 		activeContainers.put(environmentId, mysqlContainer);
