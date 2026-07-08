@@ -90,5 +90,11 @@ public class ConnectorController {
 		return ResponseEntity.noContent().build();
 	}
 	
-	
+	public ResponseEntity<Boolean> hasConnectors(
+			@PathVariable Long environmentId){
+		
+		log.info("Received connector existence check for environmentId={}", environmentId);	
+		
+		return ResponseEntity.ok(connectorService.hasConnectors(environmentId));
+	}
 }

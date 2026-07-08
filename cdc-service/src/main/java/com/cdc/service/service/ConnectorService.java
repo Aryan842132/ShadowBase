@@ -17,5 +17,7 @@ public interface ConnectorService {
 	
 	void deleteConnector(Long id);
 	
+	boolean hasConnectors(Long environmentId);
+	
 	
 }

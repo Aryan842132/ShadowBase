@@ -10,6 +10,8 @@ import com.cdc.service.model.Connector;
 @Repository
 public interface ConnectorRepository extends JpaRepository<Connector, Long>{
 	
+	boolean existsByEnvironmentId(Long environmentId);
+	
 	boolean existsByConnectorName(String connectorName);
 	
 	Optional<Connector> findByEnvironmentId(Long environmentId);

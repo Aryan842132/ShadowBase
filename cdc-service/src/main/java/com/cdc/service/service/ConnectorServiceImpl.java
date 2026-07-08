@@ -220,4 +220,12 @@ public class ConnectorServiceImpl implements ConnectorService {
 				.build();
 	}
 
+	@Override
+	public boolean hasConnectors(Long environmentId) {
+		
+		log.info("Checking connectors for environmentId={}", environmentId);
+		
+		return connectorRepository.existsByEnvironmentId(environmentId);
+	}
+
 }
