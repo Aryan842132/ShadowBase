@@ -90,6 +90,7 @@ public class ConnectorController {
 		return ResponseEntity.noContent().build();
 	}
 	
+	@GetMapping("/environment/{environmentId}/exists")
 	public ResponseEntity<Boolean> hasConnectors(
 			@PathVariable Long environmentId){
 		
