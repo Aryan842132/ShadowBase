@@ -3,12 +3,14 @@ package com.environment.service.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
+import com.environment.service.client.CdcServiceClient;
 import com.environment.service.container.ContainerInfo;
 import com.environment.service.container.TestContainerManager;
 import com.environment.service.dto.EnvironmentRequest;
 import com.environment.service.dto.EnvironmentResponse;
 import com.environment.service.exception.DuplicateEnvironmentException;
+import com.environment.service.exception.EnvironmentDeletionNotAllowedException;
 import com.environment.service.exception.ResourceNotFoundException;
 import com.environment.service.model.Environment;
 import com.environment.service.model.EnvironmentStatus;
@@ -23,8 +25,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class EnvironmentServiceImpl implements EnvironmentService {
 
+    private final CdcServiceClient cdcServiceClient;
+
 	private final EnvironmentRepository environmentRepository;	
 	private final TestContainerManager testContainerManager;
+
 	
 	@Override
 	public EnvironmentResponse createEnvironment(EnvironmentRequest request) {
@@ -108,16 +113,25 @@ public class EnvironmentServiceImpl implements EnvironmentService {
 	}
 
 	@Override
+	@Transactional
 	public void deleteEnvironment(Long id) {
+		log.info("Deleting environment with id={}",id);
+		
 		Environment environment = environmentRepository.findById(id)
 				.orElseThrow(() ->
 				         new ResourceNotFoundException("Environment not found with id: "+ id));
+		
+		if(cdcServiceClient.hasConnectors(id)) {
+			log.warn("Cannot delete environment. Connectors exist. environmentId={}", id);
+			
+			throw new EnvironmentDeletionNotAllowedException("Cannot delete environment because connectors are attached.");
+		}
 		
 		testContainerManager.removeContainer(id);
 		
 		environmentRepository.delete(environment);
 		
-		log.info("Environment deleted. id={}", id);
+		log.info("Environment deleted successfully. id={}", id);
 		
 	}
 	

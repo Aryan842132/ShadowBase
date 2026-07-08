@@ -70,6 +70,18 @@ public class GlobalExceptionHandler {
 		
 	}
 	
+	@ExceptionHandler(EnvironmentDeletionNotAllowedException.class)
+	public ResponseEntity<ErrorResponse> handleEnvironmentDeletionNotAllowed(
+			EnvironmentDeletionNotAllowedException ex){
+		
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body(ErrorResponse.builder()
+						.message(ex.getMessage())
+						.build());
+				
+	}
+	
+	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorResponse> handleGeneric(
 			Exception ex,
