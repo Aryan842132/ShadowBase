@@ -1,6 +1,7 @@
 package com.environment.service.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -67,7 +68,4 @@ public class Environment {
 	public void preUpdate() {
 		this.updatedAt=LocalDateTime.now();
 	}
-	
-	
-	
 }
