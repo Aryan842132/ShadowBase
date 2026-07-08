@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.cdc.service.client.EnvironmentServiceClient;
 import com.cdc.service.client.KafkaConnectClient;
@@ -150,6 +151,7 @@ public class ConnectorServiceImpl implements ConnectorService {
 	}
 
 	@Override
+	@Transactional
 	public void deleteConnector(Long id) {
 		log.info("Deleting connector with id={}",id);
 		
@@ -158,10 +160,26 @@ public class ConnectorServiceImpl implements ConnectorService {
 					log.error("Connector not found with id={}",id);
 					
 					return new ConnectorNotFoundException(
-							"Connector not found with id={}" +id);
+							"Connector not found with id=" +id);
 				});
+		String connetName = connector.getConnectorName();
+		
+		try {
+			kafkaConnectClient.deleteConnector(connetName);
+		}
+		catch (Exception ex) {
+			log.error(
+					"Failed to delete connector from kafka connect. name={}", 
+					connetName,
+					ex);
+			
+			throw new RuntimeException(
+					"Failed to delete connector from kafka Connect: "
+					               + connetName);
+		}
+		
 		connectorRepository.delete(connector);
-		log.info("Connector deleted successfully with id={}",id);
+		log.info("Connector deleted successfully with id={}, name={}",id, connetName);
 	}
 	
 	private ConnectorResponse mapToResponse(Connector connector) {

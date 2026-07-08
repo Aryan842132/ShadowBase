@@ -37,7 +37,16 @@ public class KafkaConnectClient {
 				request.getName());
 		
 		return response;
-		
+	}
 	
+	public void deleteConnector(String connectorName) {
+		log.info("Deleting kafka connect connector. name={}", connectorName);
+		
+		restClient.delete()
+		        .uri(kafkaConnectUrl + "/connectors/{name}", connectorName)
+		        .retrieve()
+		        .toBodilessEntity();
+		
+		log.info("Kafka connect connector deleted successfully. name={}", connectorName);
 	}
 }
