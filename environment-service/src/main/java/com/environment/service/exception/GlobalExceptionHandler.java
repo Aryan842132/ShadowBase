@@ -72,12 +72,18 @@ public class GlobalExceptionHandler {
 	
 	@ExceptionHandler(EnvironmentDeletionNotAllowedException.class)
 	public ResponseEntity<ErrorResponse> handleEnvironmentDeletionNotAllowed(
-			EnvironmentDeletionNotAllowedException ex){
+			EnvironmentDeletionNotAllowedException ex,
+			HttpServletRequest request){
 		
 		return ResponseEntity.status(HttpStatus.CONFLICT)
 				.body(ErrorResponse.builder()
+						.timestamp(LocalDateTime.now())
+						.status(HttpStatus.IM_USED.value())
+						.error("Connector exist")
 						.message(ex.getMessage())
+						.path(request.getRequestURI())
 						.build());
+						
 				
 	}
 	
