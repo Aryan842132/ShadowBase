@@ -55,7 +55,7 @@ public class KafkaConnectClient {
 		log.info("Fetching connector status. name={}", connectorName);
 		
 		KafkaConnectorStatusResponse response = restClient.get()
-				.uri(kafkaConnectUrl + "/connector/{name}/status", connectorName)
+				.uri(kafkaConnectUrl + "/connectors/{name}/status", connectorName)
 				.retrieve()
 				.body(KafkaConnectorStatusResponse.class);
 		
