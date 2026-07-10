@@ -18,6 +18,7 @@ import com.cdc.service.dto.KafkaConnectorStatusResponse;
 import com.cdc.service.exception.ConnectorCreationException;
 import com.cdc.service.exception.ConnectorNotFoundException;
 import com.cdc.service.exception.DuplicateConnectorException;
+import com.cdc.service.exception.InvalidConnectorStateException;
 import com.cdc.service.model.Connector;
 import com.cdc.service.model.ConnectorStatus;
 import com.cdc.service.model.EnvironmentStatus;
@@ -276,5 +277,38 @@ public class ConnectorServiceImpl implements ConnectorService {
 		response.setMessage(message);
 		
 		return response;
+	}
+
+	@Override
+	public ConnectorStatusResponse pauseConnector(Long connectorId) {
+		log.info("Pausing connector. id={}", connectorId);
+		
+		Connector connector = connectorRepository.findById(connectorId)
+				.orElseThrow(() -> new ConnectorNotFoundException(
+						"Connector not found with id=" + connectorId));
+		
+		if(connector.getStatus() != ConnectorStatus.RUNNING) {
+			throw new InvalidConnectorStateException(
+					"Only RUNNING connectors can be paused.");
+		}
+		
+		kafkaConnectClient.pauseConnector(connector.getConnectorName());
+		
+		connector.setStatus(ConnectorStatus.PAUSED);
+		
+		Connector updatedConnector = connectorRepository.save(connector);
+		
+		log.info(
+				"Connector paused successfully. id={}, name={}", connectorId, updatedConnector.getConnectorName());
+		
+		ConnectorStatusResponse response = new ConnectorStatusResponse();
+		
+		response.setConnectorId(updatedConnector.getId());
+		response.setConnectorName(updatedConnector.getConnectorName());
+		response.setStatus(updatedConnector.getStatus());
+		response.setMessage("Connector paused successfully");
+		
+		return response;
+		
 	}
 }

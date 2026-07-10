@@ -63,4 +63,15 @@ public class KafkaConnectClient {
 		
 		return response;
 	}
+	
+	public void pauseConnector(String connectorName) {
+		log.info("Pausing kafka connect connector. name={}", connectorName);
+		
+		restClient.put()
+		     .uri(kafkaConnectUrl + "/connectors/{name}/pause", connectorName)
+		     .retrieve()
+		     .toBodilessEntity();
+		
+		log.info("Kafka connect connector paused successfully, name={}", connectorName);
+	}
 }

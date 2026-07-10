@@ -105,4 +105,11 @@ public class ConnectorController {
 	public ResponseEntity<ConnectorStatusResponse> syncConnectorStatus(@PathVariable Long id){
 		return ResponseEntity.ok(connectorService.syncConnectorStatus(id));
 	}
+	
+	@PutMapping("/{connectorId}/pause")
+	public ResponseEntity<ConnectorStatusResponse> pauseConnector(@PathVariable Long connectorId){
+		log.info("Received request to pause connector. id={}", connectorId);
+		
+		return ResponseEntity.ok(connectorService.pauseConnector(connectorId));
+	}
 }
