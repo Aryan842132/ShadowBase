@@ -7,5 +7,6 @@ public enum ConnectorStatus {
 	PAUSED,
 	FAILED,
 	STOPPED,
-	DELETING
+	DELETING,
+	UNASSIGNED
 }

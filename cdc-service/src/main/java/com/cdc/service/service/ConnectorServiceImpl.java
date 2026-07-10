@@ -11,8 +11,10 @@ import com.cdc.service.client.EnvironmentServiceClient;
 import com.cdc.service.client.KafkaConnectClient;
 import com.cdc.service.dto.ConnectorRequest;
 import com.cdc.service.dto.ConnectorResponse;
+import com.cdc.service.dto.ConnectorStatusResponse;
 import com.cdc.service.dto.EnvironmentResponse;
 import com.cdc.service.dto.KafkaConnectorRequest;
+import com.cdc.service.dto.KafkaConnectorStatusResponse;
 import com.cdc.service.exception.ConnectorCreationException;
 import com.cdc.service.exception.ConnectorNotFoundException;
 import com.cdc.service.exception.DuplicateConnectorException;
@@ -228,4 +230,51 @@ public class ConnectorServiceImpl implements ConnectorService {
 		return connectorRepository.existsByEnvironmentId(environmentId);
 	}
 
+	@Override
+	public ConnectorStatusResponse syncConnectorStatus(Long id) {
+		log.info("Syncing connector status. id={}", id);
+		
+		Connector connector = connectorRepository.findById(id)
+				.orElseThrow(() -> new ConnectorNotFoundException(
+						"Connector not found with id=" + id));
+		
+		KafkaConnectorStatusResponse kafkaResponse = kafkaConnectClient.getConnectorStatus(connector.getConnectorName());
+		
+		ConnectorStatus status = mapStatus(kafkaResponse.getConnector().getState());
+		
+		connector.setStatus(status);
+		
+		connectorRepository.save(connector);
+		
+		log.info("Connector status synced successfully. id={}, status={}", id, status);
+		
+		return buildStatusResponse(connector, "Connector status synchronized successfully") ;
+	}
+	
+	private ConnectorStatus  mapStatus(String state) {
+		return switch(state.toUpperCase()) {
+		 
+		case "RUNNING" -> ConnectorStatus.RUNNING;
+		
+		case "PAUSED" -> ConnectorStatus.PAUSED;
+		
+		case "FAILED" -> ConnectorStatus.FAILED;
+		
+		case "UNASSIGNED" -> ConnectorStatus.STOPPED;
+		
+		default -> ConnectorStatus.STOPPED;
+		
+		};
+	}
+
+	private ConnectorStatusResponse buildStatusResponse(Connector connector, String message) {
+		ConnectorStatusResponse response = new ConnectorStatusResponse();
+		
+		response.setConnectorId(connector.getId());
+		response.setConnectorName(connector.getConnectorName());
+		response.setStatus(connector.getStatus());
+		response.setMessage(message);
+		
+		return response;
+	}
 }

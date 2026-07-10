@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.cdc.service.dto.ConnectorRequest;
 import com.cdc.service.dto.ConnectorResponse;
+import com.cdc.service.dto.ConnectorStatusResponse;
 
 public interface ConnectorService {
 
@@ -18,6 +19,8 @@ public interface ConnectorService {
 	void deleteConnector(Long id);
 	
 	boolean hasConnectors(Long environmentId);
+	
+	ConnectorStatusResponse syncConnectorStatus(Long id);
 	
 	
 }

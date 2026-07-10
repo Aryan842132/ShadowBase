@@ -6,6 +6,7 @@ import org.springframework.web.client.RestClient;
 
 import com.cdc.service.dto.KafkaConnectorRequest;
 import com.cdc.service.dto.KafkaConnectorResponse;
+import com.cdc.service.dto.KafkaConnectorStatusResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,5 +49,18 @@ public class KafkaConnectClient {
 		        .toBodilessEntity();
 		
 		log.info("Kafka connect connector deleted successfully. name={}", connectorName);
+	}
+	
+	public KafkaConnectorStatusResponse getConnectorStatus(String connectorName) {
+		log.info("Fetching connector status. name={}", connectorName);
+		
+		KafkaConnectorStatusResponse response = restClient.get()
+				.uri(kafkaConnectUrl + "/connector/{name}/status", connectorName)
+				.retrieve()
+				.body(KafkaConnectorStatusResponse.class);
+		
+		log.info("Connector status fetched successfully. name={}", connectorName);
+		
+		return response;
 	}
 }
