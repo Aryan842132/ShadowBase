@@ -112,4 +112,11 @@ public class ConnectorController {
 		
 		return ResponseEntity.ok(connectorService.pauseConnector(connectorId));
 	}
+	
+	@PutMapping("/{id}/resume")
+	public ResponseEntity<ConnectorStatusResponse> resumeConnector(@PathVariable Long id){
+		log.info("Received request to resume connector. id={}", id);
+		
+		return ResponseEntity.ok(connectorService.resumeConnector(id));
+	}
 }

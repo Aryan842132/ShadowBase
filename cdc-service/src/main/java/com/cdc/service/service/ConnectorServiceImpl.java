@@ -280,12 +280,13 @@ public class ConnectorServiceImpl implements ConnectorService {
 	}
 
 	@Override
-	public ConnectorStatusResponse pauseConnector(Long connectorId) {
-		log.info("Pausing connector. id={}", connectorId);
+	@Transactional
+	public ConnectorStatusResponse pauseConnector(Long id) {
+		log.info("Pausing connector. id={}", id);
 		
-		Connector connector = connectorRepository.findById(connectorId)
+		Connector connector = connectorRepository.findById(id)
 				.orElseThrow(() -> new ConnectorNotFoundException(
-						"Connector not found with id=" + connectorId));
+						"Connector not found with id=" + id));
 		
 		if(connector.getStatus() != ConnectorStatus.RUNNING) {
 			throw new InvalidConnectorStateException(
@@ -299,7 +300,7 @@ public class ConnectorServiceImpl implements ConnectorService {
 		Connector updatedConnector = connectorRepository.save(connector);
 		
 		log.info(
-				"Connector paused successfully. id={}, name={}", connectorId, updatedConnector.getConnectorName());
+				"Connector paused successfully. id={}, name={}", id, updatedConnector.getConnectorName());
 		
 		ConnectorStatusResponse response = new ConnectorStatusResponse();
 		
@@ -310,5 +311,36 @@ public class ConnectorServiceImpl implements ConnectorService {
 		
 		return response;
 		
+	}
+
+	@Override
+	@Transactional
+	public ConnectorStatusResponse resumeConnector(Long id) {
+		log.info("Resuming connector. id={}", id);
+		
+		Connector connector = connectorRepository.findById(id)
+				.orElseThrow(() -> new ConnectorNotFoundException("Connector not found with id=" + id));
+		
+		if(connector.getStatus() != ConnectorStatus.PAUSED) {
+			throw new InvalidConnectorStateException("Only paused connector can be resumed.");
+		}
+		
+		kafkaConnectClient.resumeConnector(connector.getConnectorName());
+		
+		connector.setStatus(ConnectorStatus.RUNNING);
+		
+		Connector updatedConnector = connectorRepository.save(connector);
+		
+		log.info("Connector resumed successfully. id={}, name={}",
+				id, updatedConnector.getConnectorName());
+		
+		ConnectorStatusResponse response = new ConnectorStatusResponse();
+		
+		response.setConnectorId(updatedConnector.getId());
+		response.setConnectorName(updatedConnector.getConnectorName());
+		response.setStatus(updatedConnector.getStatus());
+		response.setMessage("Connector resumed successfully");
+		
+		return response;
 	}
 }

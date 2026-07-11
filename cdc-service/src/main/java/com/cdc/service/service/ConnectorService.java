@@ -22,7 +22,7 @@ public interface ConnectorService {
 	
 	ConnectorStatusResponse syncConnectorStatus(Long id);
 	
-	ConnectorStatusResponse pauseConnector(Long connectorId);
+	ConnectorStatusResponse pauseConnector(Long id);
 	
-	
+	ConnectorStatusResponse resumeConnector(Long id);
 }
