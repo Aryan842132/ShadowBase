@@ -6,5 +6,7 @@ public enum EnvironmentStatus {
 	RUNNING,
 	STOPPED,
 	FAILED,
-	DELETED
+	DELETED,
+	PAUSED,
+	ORPHANED
 }

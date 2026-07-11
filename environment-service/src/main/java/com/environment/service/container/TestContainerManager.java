@@ -1,11 +1,14 @@
 package com.environment.service.container;
 
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 import org.testcontainers.containers.Container.ExecResult;
+
+import com.github.dockerjava.api.DockerClient;
+
+import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.MySQLContainer;
 
 import lombok.extern.slf4j.Slf4j;
@@ -95,7 +98,35 @@ public class TestContainerManager {
 		return container != null && container.isRunning();
 	}
 	
+    public boolean containerExists(String containerId) {
+		
+		DockerClient dockerClient = DockerClientFactory.instance().client();
+		
+		try {
+			dockerClient.inspectContainerCmd(containerId)
+			.exec();
+			
+			return true;
+		}
+		catch (Exception ex) {
+			return false;
+		}
+	}
 	
-	
-	
+     public boolean isContainerRunning(String containerId) {
+		
+		DockerClient dockerClient = DockerClientFactory.instance().client();
+		
+		try {
+			return Boolean.TRUE.equals(dockerClient
+					.inspectContainerCmd(containerId)
+					.exec()
+					.getState()
+					.getRunning()
+					);
+		}
+		catch(Exception ex) {
+			return false;		
+		}
+	}
 }
